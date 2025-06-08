@@ -7,11 +7,5 @@
 *.tmp
 *.log
 
-# LP関連ファイル（Day13と無関係）
-my-first-LP/index.html
-my-first-LP/styles.css
-my-first-LP/script.js
-my-first-LP/images/
-
-# 学習ログは管理対象（除外しない）
-# daily-logs/ は Git管理する
+# LP関連（学習とは無関係）
+my-first-LP/
