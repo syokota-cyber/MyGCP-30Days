@@ -1,0 +1,32 @@
+steps:
+  # Step 1: 依存関係のインストール
+  - name: 'python:3.11'
+    entrypoint: pip
+    args: ['install', '-r', 'requirements.txt']
+
+  # Step 2: テストの実行
+  - name: 'python:3.11'
+    entrypoint: python
+    args: ['-m', 'pytest', 'tests/', '-v']
+    env:
+      - 'PYTHONPATH=/workspace'
+      - 'TESTING=true'
+      - 'GOOGLE_CLOUD_PROJECT=test-project'
+
+  # Step 3: Cloud Run へのデプロイ
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'fastapi-notes'
+      - '--source=.'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+
+# ビルドオプション
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# ビルド時間の制限
+timeout: '1200s'

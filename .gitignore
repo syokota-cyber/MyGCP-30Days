@@ -1,3 +1,13 @@
+HEAD
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.pytest_cache/
+.coverage
+.env
+.DS_Store
+
 # macOS
 .DS_Store
 .DS_Store?
@@ -9,3 +19,5 @@
 
 # LP関連（学習とは無関係）
 my-first-LP/
+
+993587e2c5abc0503c01311f5cd4b0159b83302b
