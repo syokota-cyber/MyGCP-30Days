@@ -1,0 +1,25 @@
+name: projects/gcp-handson-30days-30010/locations/asia-northeast1/jobs/day18-artifact-registry-learning
+description: "Day18 Artifact Registry学習の自動継続実行"
+schedule: "0 */6 * * *"  # 6時間ごと
+timeZone: "Asia/Tokyo"
+httpTarget:
+  uri: "https://cloudbuild.googleapis.com/v1/projects/gcp-handson-30days-30010/builds"
+  httpMethod: POST
+  headers:
+    "Content-Type": "application/json"
+  body: |
+    {
+      "source": {
+        "repoSource": {
+          "projectId": "gcp-handson-30days-30010",
+          "repoName": "MyGCP-30Days",
+          "branchName": "main"
+        }
+      },
+      "steps": [
+        {
+          "name": "gcr.io/cloud-builders/gcloud",
+          "args": ["artifacts", "repositories", "list", "--location=asia-northeast1"]
+        }
+      ]
+    }

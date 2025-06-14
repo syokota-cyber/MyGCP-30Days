@@ -1,0 +1,92 @@
+steps:
+  # Day18: Artifact Registry応用管理
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      echo "📊 Day18: Artifact Registry応用管理開始"
+      
+      # 1. カスタムレポジトリ作成
+      gcloud artifacts repositories create production-images \
+        --repository-format=docker \
+        --location=asia-northeast1 \
+        --description="Day18学習用プロダクションレポジトリ" || echo "既に存在"
+      
+      # 2. 既存イメージの分析
+      echo "📈 既存イメージサイズ分析:"
+      gcloud artifacts docker images list \
+        asia-northeast1-docker.pkg.dev/$$PROJECT_ID/cloud-run-source-deploy \
+        --format="table(package,createTime,sizeBytes)"
+      
+      # 3. クリーンアップポリシー作成・適用
+      cat > /workspace/cleanup-policy.json << 'EOL'
+      {
+        "rules": [
+          {
+            "name": "keep-minimum-versions",
+            "action": {"type": "Keep"},
+            "mostRecentVersions": {"keepCount": 3}
+          },
+          {
+            "name": "delete-old-versions",
+            "action": {"type": "Delete"},
+            "olderThan": "30d"
+          }
+        ]
+      }
+      EOL
+      
+      # ポリシー適用（ドライラン）
+      gcloud artifacts repositories set-cleanup-policies cloud-run-source-deploy \
+        --location=asia-northeast1 \
+        --policy=/workspace/cleanup-policy.json \
+        --dry-run
+      
+      echo "✅ Day18 Artifact Registry応用管理完了"
+
+  # 学習記録をGitHubに自動コミット
+  - name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      # Git設定
+      git config user.email "shin1yokota@gmail.com"
+      git config user.name "Cloud Build Auto"
+      
+      # Day18学習記録作成
+      mkdir -p daily-logs
+      cat > daily-logs/day18-auto-$(date +%Y%m%d-%H%M).md << 'EOL'
+      # Day18: Artifact Registry応用管理（自動実行）
+      
+      ## ✅ 自動実行完了項目
+      - カスタムレポジトリ作成: production-images
+      - 既存イメージ分析実行
+      - クリーンアップポリシー設定（ドライラン）
+      
+      ## 📊 実行結果
+      実行時刻: $(date)
+      Cloud Build ID: $BUILD_ID
+      
+      ## 🎯 次のステップ
+      - 手動でのイメージ最適化
+      - セマンティックバージョニング実装
+      EOL
+      
+      # 自動コミット・プッシュ
+      git add .
+      git commit -m "🤖 Day18自動実行: Artifact Registry応用管理
+
+      ✅ Cloud Build自動実行完了:
+      - production-imagesレポジトリ作成
+      - 既存イメージ分析
+      - クリーンアップポリシー設定
+      
+      🕐 実行時刻: $(date)
+      🆔 Build ID: $BUILD_ID"
+      
+      git push origin main
+
+substitutions:
+  _LOCATION: 'asia-northeast1'
